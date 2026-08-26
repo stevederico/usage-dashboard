@@ -1,5 +1,5 @@
 {
-    "version": "0.2.0",
+    "version": "0.3.0",
     "design": {
         "baseColor": "neutral",
         "radius": "medium",
@@ -8,7 +8,7 @@
     },
     "appName": "Usage",
     "appIcon": "gauge",
-    "tagline": "local cli usage for cursor, grok, claude, and opencode",
+    "tagline": "usage dashboard for all your agents",
     "cta": "Get Started",
     "ctaHeading": "Ready to Get Started?",
     "noLogin": true,

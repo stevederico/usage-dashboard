@@ -1,6 +1,10 @@
 - Add Codex collector
 - Add Gemini collector
 
+0.3.0
+
+  Update project tagline
+
 0.2.0
 
   Rename usage dashboard

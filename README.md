@@ -1,12 +1,12 @@
 <div align="center">
   <img alt="Usage Dashboard Simple view" src="docs/screenshot.png" width="100%">
   <h1>Usage Dashboard</h1>
-  <h3>local cli usage for cursor, grok, claude, and opencode</h3>
+  <h3>usage dashboard for all your agents</h3>
 </div>
 
 <br />
 
-Reads usage from the CLIs already signed in on this machine. Nothing is uploaded.
+Reads usage from the agents already signed in on this machine. Nothing is uploaded.
 
 <br />
 
