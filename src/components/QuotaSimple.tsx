@@ -34,21 +34,18 @@ export default function QuotaSimple({ plans }: QuotaSimpleProps) {
         const reset = formatReset(plan.resetsAt);
         return (
           <div key={plan.id} className="flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between gap-4">
+            <div className="grid grid-cols-3 items-baseline">
               <p className="text-label-md">{plan.name}</p>
+              <p className="text-label-md text-muted-foreground tabular-nums text-center">
+                {reset ?? ''}
+              </p>
               <p
                 className={cn(
-                  'text-label-md tabular-nums',
+                  'text-label-md tabular-nums text-right',
                   used !== null ? usedTone(used) : 'text-muted-foreground'
                 )}
               >
                 {value}
-                {reset ? (
-                  <span className="text-muted-foreground font-normal">
-                    {' '}
-                    {reset}
-                  </span>
-                ) : null}
               </p>
             </div>
             <Progress
