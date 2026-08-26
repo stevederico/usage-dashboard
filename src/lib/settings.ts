@@ -4,13 +4,12 @@ export const SETTINGS_EVENT = 'quota-settings';
 /** Refresh interval choices. */
 export const REFRESH_OPTIONS = [
   { value: 0, label: 'Manual' },
-  { value: 30_000, label: '30 Seconds' },
-  { value: 60_000, label: '1 Minute' },
   { value: 300_000, label: '5 Minutes' },
   { value: 900_000, label: '15 Minutes' },
+  { value: 3_600_000, label: '1 Hour' },
 ] as const;
 
-const DEFAULT_MS = 300_000;
+const DEFAULT_MS = 3_600_000;
 
 /**
  * Read the usage refresh interval from localStorage.

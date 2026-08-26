@@ -9,7 +9,7 @@ vi.mock('@stevederico/skateboard-ui/SettingsView', () => ({
 vi.mock('@stevederico/skateboard-ui/shadcn/ui/select', () => ({
   Select: ({ children, value }) => <div data-testid="refresh-select" data-value={value}>{children}</div>,
   SelectTrigger: ({ children }) => <div>{children}</div>,
-  SelectValue: () => <span>5 Minutes</span>,
+  SelectValue: () => <span>1 Hour</span>,
   SelectContent: ({ children }) => <div>{children}</div>,
   SelectItem: ({ children }) => <div>{children}</div>,
 }));
