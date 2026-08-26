@@ -283,35 +283,34 @@ export function parseCursorUsage(raw: unknown): PlanQuota {
 }
 
 /**
- * Parse Claude Code `~/.claude.json` usage cache.
+ * True when a reset timestamp is still in the future.
  *
- * @param raw - File JSON
- * @returns Plan quota
+ * @param resetsAt - ISO timestamp
+ * @param now - Reference time
+ * @returns Whether the window is still open
  */
-export function parseClaudeCache(raw: unknown): PlanQuota {
-  const root = asObject(raw);
-  if (!root) {
-    return failPlan('claude', 'Claude', 'Max 5x', 'Claude Code config missing');
-  }
-  const account = asObject(root.oauthAccount);
-  const tier =
-    str(account ?? {}, 'organizationRateLimitTier') ??
-    str(account ?? {}, 'userRateLimitTier') ??
-    'max';
-  const plan = planLabelFromTier(tier);
-  const cached = asObject(root.cachedUsageUtilization);
-  const util = asObject(cached?.utilization);
-  if (!util) {
-    return failPlan('claude', 'Claude', plan, 'Claude Code has no cached usage. Run /usage in claude.');
-  }
+export function isResetPending(resetsAt: string | null, now = Date.now()): boolean {
+  if (!resetsAt) return false;
+  const ms = Date.parse(resetsAt);
+  return Number.isFinite(ms) && ms > now;
+}
+
+/**
+ * Build Claude bars from five-hour / week utilization objects.
+ *
+ * @param util - Utilization map
+ * @param now - Reference time
+ * @returns Active bars only
+ */
+function claudeBarsFromUtil(util: JsonObject, now = Date.now()): QuotaBar[] {
+  const bars: QuotaBar[] = [];
   const session = asObject(util.five_hour);
   const week = asObject(util.seven_day);
   const sessionPct = session ? num(session, 'utilization') : null;
-  const weekPct = week ? num(week, 'utilization') : null;
   const sessionReset = session ? str(session, 'resets_at') : null;
+  const weekPct = week ? num(week, 'utilization') : null;
   const weekReset = week ? str(week, 'resets_at') : null;
-  const bars: QuotaBar[] = [];
-  if (sessionPct !== null) {
+  if (sessionPct !== null && isResetPending(sessionReset, now)) {
     bars.push({
       id: 'session',
       label: 'Session (5h)',
@@ -319,7 +318,7 @@ export function parseClaudeCache(raw: unknown): PlanQuota {
       resetsAt: sessionReset,
     });
   }
-  if (weekPct !== null) {
+  if (weekPct !== null && isResetPending(weekReset, now)) {
     bars.push({
       id: 'week',
       label: 'Week',
@@ -333,6 +332,8 @@ export function parseClaudeCache(raw: unknown): PlanQuota {
     if (!row) continue;
     const kind = str(row, 'kind');
     if (kind !== 'weekly_scoped') continue;
+    const reset = str(row, 'resets_at');
+    if (!isResetPending(reset, now)) continue;
     const scope = asObject(row.scope);
     const model = asObject(scope?.model);
     const label = str(model ?? {}, 'display_name') ?? 'Scoped';
@@ -342,23 +343,105 @@ export function parseClaudeCache(raw: unknown): PlanQuota {
       id: `scoped-${label.toLowerCase()}`,
       label,
       usedPercent: clampPercent(pct),
-      resetsAt: str(row, 'resets_at'),
+      resetsAt: reset,
     });
   }
-  const fetchedAtMs = cached ? num(cached, 'fetchedAtMs') : null;
-  const stale =
-    fetchedAtMs !== null && Date.now() - fetchedAtMs > 6 * 3_600_000;
+  return bars;
+}
+
+/**
+ * Parse Claude Code `~/.claude.json` usage cache.
+ *
+ * `/usage` in the TUI does not write this cache. Drop windows whose reset
+ * already passed so we never show a finished period as current.
+ *
+ * @param raw - File JSON
+ * @param now - Reference time
+ * @returns Plan quota
+ */
+export function parseClaudeCache(raw: unknown, now = Date.now()): PlanQuota {
+  const root = asObject(raw);
+  if (!root) {
+    return failPlan('claude', 'Claude', 'Max 5x', 'Claude Code config missing');
+  }
+  const account = asObject(root.oauthAccount);
+  const tier =
+    str(account ?? {}, 'organizationRateLimitTier') ??
+    str(account ?? {}, 'userRateLimitTier') ??
+    'max';
+  const plan = planLabelFromTier(tier);
+  const cached = asObject(root.cachedUsageUtilization);
+  const util = asObject(cached?.utilization);
+  if (!util) {
+    return failPlan(
+      'claude',
+      'Claude',
+      plan,
+      'No live Claude usage. Run claude auth login.'
+    );
+  }
+  const bars = claudeBarsFromUtil(util, now);
+  if (bars.length === 0) {
+    return {
+      id: 'claude',
+      name: 'Claude',
+      plan,
+      ok: true,
+      error: 'Cached windows already reset. Live fetch needs claude auth login.',
+      source: 'Claude Code ~/.claude.json',
+      usedPercent: null,
+      headline: null,
+      stats: [],
+      resetsAt: null,
+      bars: [],
+    };
+  }
+  const week = bars.find((b) => b.id === 'week');
   return {
     id: 'claude',
     name: 'Claude',
     plan,
     ok: true,
-    error: stale ? 'Claude Code cache is older than 6h. Run /usage in claude.' : null,
+    error: null,
     source: 'Claude Code ~/.claude.json',
-    usedPercent: clampPercent(weekPct ?? sessionPct ?? 0),
+    usedPercent: week?.usedPercent ?? bars[0]?.usedPercent ?? null,
     headline: null,
     stats: [],
-    resetsAt: weekReset ?? sessionReset,
+    resetsAt: week?.resetsAt ?? bars[0]?.resetsAt ?? null,
+    bars,
+  };
+}
+
+/**
+ * Parse GET /api/oauth/usage JSON.
+ *
+ * @param raw - API body
+ * @param plan - Plan label
+ * @param now - Reference time
+ * @returns Plan quota
+ */
+export function parseClaudeOauthUsage(
+  raw: unknown,
+  plan: string,
+  now = Date.now()
+): PlanQuota {
+  const util = asObject(raw);
+  if (!util) {
+    return failPlan('claude', 'Claude', plan, 'Claude oauth usage JSON missing');
+  }
+  const bars = claudeBarsFromUtil(util, now);
+  const week = bars.find((b) => b.id === 'week');
+  return {
+    id: 'claude',
+    name: 'Claude',
+    plan,
+    ok: bars.length > 0,
+    error: bars.length === 0 ? 'Claude oauth usage had no open windows.' : null,
+    source: 'claude oauth /api/oauth/usage',
+    usedPercent: week?.usedPercent ?? bars[0]?.usedPercent ?? null,
+    headline: null,
+    stats: [],
+    resetsAt: week?.resetsAt ?? bars[0]?.resetsAt ?? null,
     bars,
   };
 }
@@ -545,7 +628,30 @@ export async function fetchCursorQuota(home = homedir()): Promise<PlanQuota> {
 }
 
 /**
- * Fetch Claude Max usage from Claude Code's local cache.
+ * Read a Claude Code OAuth access token from the macOS keychain.
+ *
+ * @returns Token or null
+ */
+async function readClaudeOauthToken(): Promise<string | null> {
+  const fromEnv = process.env.CLAUDE_CODE_OAUTH_TOKEN;
+  if (fromEnv && fromEnv.length > 20) return fromEnv;
+  try {
+    const { stdout } = await execFileAsync(
+      'security',
+      ['find-generic-password', '-s', 'Claude Code-credentials', '-w'],
+      { timeout: 5_000 }
+    );
+    const cred: unknown = JSON.parse(stdout);
+    const oauth = asObject(asObject(cred)?.claudeAiOauth);
+    const token = oauth ? str(oauth, 'accessToken') : null;
+    return token && token.length > 20 ? token : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch Claude Max usage. Prefer live oauth; cache is a fallback only.
  *
  * @param home - Home directory
  * @returns Plan quota
@@ -553,24 +659,19 @@ export async function fetchCursorQuota(home = homedir()): Promise<PlanQuota> {
 export async function fetchClaudeQuota(home = homedir()): Promise<PlanQuota> {
   const raw = await readFile(join(home, '.claude.json'), 'utf8');
   const parsed: unknown = JSON.parse(raw);
-  const plan = parseClaudeCache(parsed);
-  try {
-    const { stdout } = await execFileAsync('claude', ['auth', 'status', '--json'], {
-      timeout: 8_000,
-      env: process.env,
+  const cached = parseClaudeCache(parsed);
+  const token = await readClaudeOauthToken();
+  if (token) {
+    const live = await fetchJson('https://api.anthropic.com/api/oauth/usage', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'anthropic-beta': 'oauth-2025-04-20',
+        Accept: 'application/json',
+      },
     });
-    const status: unknown = JSON.parse(stdout);
-    const obj = asObject(status);
-    if (obj && obj.loggedIn === false && plan.ok) {
-      return {
-        ...plan,
-        error: plan.error ?? 'claude auth status: not logged in for this process',
-      };
-    }
-  } catch {
-    // Cache is enough; CLI status is extra.
+    return parseClaudeOauthUsage(live, cached.plan);
   }
-  return plan;
+  return cached;
 }
 
 /**

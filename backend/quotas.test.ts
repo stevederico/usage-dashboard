@@ -5,6 +5,7 @@ import {
   formatReset,
   formatTokenCount,
   parseClaudeCache,
+  parseClaudeOauthUsage,
   parseCursorUsage,
   parseGrokBilling,
   parseOpenCodeTotals,
@@ -95,7 +96,8 @@ describe('parseOpenCodeTotals', () => {
 
 describe('parseClaudeCache', () => {
   it('reads Max 5x session and week bars', () => {
-    const plan = parseClaudeCache({
+    const plan = parseClaudeCache(
+      {
       oauthAccount: { organizationRateLimitTier: 'default_claude_max_5x' },
       cachedUsageUtilization: {
         fetchedAtMs: Date.now(),
@@ -118,11 +120,56 @@ describe('parseClaudeCache', () => {
           ],
         },
       },
-    });
+      },
+      Date.parse('2026-08-26T19:00:00Z')
+    );
     assert.equal(plan.ok, true);
     assert.equal(plan.plan, 'Max 5x');
     assert.equal(plan.usedPercent, 49);
     assert.equal(plan.bars.length, 3);
     assert.equal(plan.bars[2]?.label, 'Fable');
+    assert.equal(plan.error, null);
+  });
+
+  it('drops finished windows and does not nag about /usage', () => {
+    const plan = parseClaudeCache(
+      {
+        oauthAccount: { organizationRateLimitTier: 'default_claude_max_5x' },
+        cachedUsageUtilization: {
+          fetchedAtMs: 1,
+          utilization: {
+            five_hour: {
+              utilization: 39,
+              resets_at: '2026-08-20T06:29:59Z',
+            },
+            seven_day: {
+              utilization: 49,
+              resets_at: '2026-08-24T00:59:59Z',
+            },
+          },
+        },
+      },
+      Date.parse('2026-08-26T19:00:00Z')
+    );
+    assert.equal(plan.bars.length, 0);
+    assert.equal(plan.usedPercent, null);
+    assert.match(plan.error ?? '', /login/i);
+    assert.doesNotMatch(plan.error ?? '', /\/usage/i);
+  });
+});
+
+describe('parseClaudeOauthUsage', () => {
+  it('maps live five-hour and week percents', () => {
+    const plan = parseClaudeOauthUsage(
+      {
+        five_hour: { utilization: 12, resets_at: '2026-08-26T22:00:00Z' },
+        seven_day: { utilization: 40, resets_at: '2026-08-31T00:00:00Z' },
+      },
+      'Max 5x',
+      Date.parse('2026-08-26T19:00:00Z')
+    );
+    assert.equal(plan.ok, true);
+    assert.equal(plan.usedPercent, 40);
+    assert.equal(plan.source, 'claude oauth /api/oauth/usage');
   });
 });

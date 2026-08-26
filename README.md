@@ -24,4 +24,4 @@ bun run start
 Frontend: http://localhost:5173
 Backend: http://localhost:8000
 
-If Grok shows expired, run `grok login`. If Claude is stale, open `claude` and run `/usage`.
+If Grok shows expired, run `grok login`. If Claude cannot fetch live usage, run `claude auth login`. `/usage` in the TUI does not update the local cache.
