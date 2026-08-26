@@ -384,9 +384,10 @@ export function parseCursorUsage(raw: unknown): PlanQuota {
  * @returns Whether the window is still open
  */
 export function isResetPending(resetsAt: string | null, now = Date.now()): boolean {
-  if (!resetsAt) return false;
+  if (!resetsAt) return true;
   const ms = Date.parse(resetsAt);
-  return Number.isFinite(ms) && ms > now;
+  if (!Number.isFinite(ms)) return true;
+  return ms > now;
 }
 
 /**
@@ -756,14 +757,18 @@ export async function fetchClaudeQuota(home = homedir()): Promise<PlanQuota> {
   const cached = parseClaudeCache(parsed);
   const token = await readClaudeOauthToken();
   if (token) {
-    const live = await fetchJson('https://api.anthropic.com/api/oauth/usage', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'anthropic-beta': 'oauth-2025-04-20',
-        Accept: 'application/json',
-      },
-    });
-    return attachClaudeStats(parseClaudeOauthUsage(live, cached.plan), home);
+    try {
+      const live = await fetchJson('https://api.anthropic.com/api/oauth/usage', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'anthropic-beta': 'oauth-2025-04-20',
+          Accept: 'application/json',
+        },
+      });
+      return attachClaudeStats(parseClaudeOauthUsage(live, cached.plan), home);
+    } catch {
+      // Rate limits and auth blips should not blank the card.
+    }
   }
   return attachClaudeStats(cached, home);
 }

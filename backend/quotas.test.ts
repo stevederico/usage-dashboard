@@ -162,6 +162,23 @@ describe('parseClaudeCache', () => {
     assert.match(plan.error ?? '', /login/i);
     assert.doesNotMatch(plan.error ?? '', /\/usage/i);
   });
+
+  it('keeps a 0% window when reset time is missing', () => {
+    const plan = parseClaudeCache({
+      oauthAccount: { organizationRateLimitTier: 'default_claude_max_5x' },
+      cachedUsageUtilization: {
+        fetchedAtMs: Date.now(),
+        utilization: {
+          five_hour: { utilization: 0, resets_at: null },
+          seven_day: { utilization: 0, resets_at: null },
+        },
+      },
+    });
+    assert.equal(plan.ok, true);
+    assert.equal(plan.usedPercent, 0);
+    assert.equal(plan.bars.length, 2);
+    assert.equal(plan.error, null);
+  });
 });
 
 describe('parseClaudeStatsCache', () => {
