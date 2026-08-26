@@ -16,3 +16,21 @@ export function formatReset(resetsAt: string | null, now = Date.now()): string |
   if (hours < 48) return `${hours}h`;
   return `${Math.round(hours / 24)}d`;
 }
+
+/** Plan fields needed for the simple-row value. */
+export type PlanValueSource = {
+  usedPercent: number | null;
+  headline?: string | null;
+};
+
+/**
+ * One-line value for a plan: percent, cost headline, or an em dash.
+ *
+ * @param plan - Plan snapshot
+ * @returns Display value
+ */
+export function formatPlanValue(plan: PlanValueSource): string {
+  if (plan.usedPercent !== null) return `${Math.round(plan.usedPercent)}%`;
+  if (plan.headline) return plan.headline;
+  return '-';
+}
