@@ -2,9 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { formatPlanValue, formatReset } from './format';
 
 describe('formatReset', () => {
-  it('formats a day as hours when under 48h', () => {
+  it('formats a full day as 1d', () => {
     const now = Date.parse('2026-08-26T12:00:00Z');
-    expect(formatReset('2026-08-27T12:00:00Z', now)).toBe('24h');
+    expect(formatReset('2026-08-27T12:00:00Z', now)).toBe('1d');
+  });
+
+  it('formats days and leftover hours', () => {
+    const now = Date.parse('2026-08-26T12:00:00Z');
+    expect(formatReset('2026-08-28T17:00:00Z', now)).toBe('2d 5h');
   });
 
   it('returns now when the timestamp is past', () => {

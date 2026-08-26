@@ -29,9 +29,14 @@ describe('planLabelFromTier', () => {
 });
 
 describe('formatReset', () => {
-  it('formats hours remaining', () => {
+  it('formats a full day as 1d', () => {
     const now = Date.parse('2026-08-26T12:00:00Z');
-    assert.equal(formatReset('2026-08-27T12:00:00Z', now), '24h');
+    assert.equal(formatReset('2026-08-27T12:00:00Z', now), '1d');
+  });
+
+  it('formats days and leftover hours', () => {
+    const now = Date.parse('2026-08-26T12:00:00Z');
+    assert.equal(formatReset('2026-08-28T17:00:00Z', now), '2d 5h');
   });
 });
 

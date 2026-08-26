@@ -11,10 +11,13 @@ export function formatReset(resetsAt: string | null, now = Date.now()): string |
   if (!Number.isFinite(ms)) return null;
   const delta = ms - now;
   if (delta <= 0) return 'now';
-  const hours = Math.round(delta / 3_600_000);
-  if (hours < 1) return `${Math.max(1, Math.round(delta / 60_000))}m`;
-  if (hours < 48) return `${hours}h`;
-  return `${Math.round(hours / 24)}d`;
+  const minutes = Math.max(1, Math.round(delta / 60_000));
+  const days = Math.floor(minutes / 1_440);
+  const hours = Math.floor((minutes % 1_440) / 60);
+  if (days > 0 && hours > 0) return `${days}d ${hours}h`;
+  if (days > 0) return `${days}d`;
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
 }
 
 /** Plan fields needed for the simple-row value. */

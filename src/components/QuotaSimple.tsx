@@ -1,6 +1,6 @@
 import { Progress } from '@stevederico/skateboard-ui/shadcn/ui/progress';
 import { cn } from '@stevederico/skateboard-ui/shadcn/lib/utils';
-import { formatPlanValue } from '../lib/format';
+import { formatPlanValue, formatReset } from '../lib/format';
 import type { PlanQuota } from './QuotaCard';
 
 type QuotaSimpleProps = {
@@ -31,6 +31,7 @@ export default function QuotaSimple({ plans }: QuotaSimpleProps) {
       {plans.map((plan) => {
         const used = plan.usedPercent;
         const value = formatPlanValue(plan);
+        const reset = formatReset(plan.resetsAt);
         return (
           <div key={plan.id} className="flex flex-col gap-1.5">
             <div className="flex items-baseline justify-between gap-4">
@@ -42,6 +43,12 @@ export default function QuotaSimple({ plans }: QuotaSimpleProps) {
                 )}
               >
                 {value}
+                {reset ? (
+                  <span className="text-muted-foreground font-normal">
+                    {' '}
+                    {reset}
+                  </span>
+                ) : null}
               </p>
             </div>
             <Progress
