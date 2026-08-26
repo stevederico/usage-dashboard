@@ -38,7 +38,7 @@ export default function SettingsView() {
           <CardHeader>
             <CardTitle>Usage Refresh</CardTitle>
             <CardDescription>
-              How often Quota reloads Cursor, Grok, Claude, and OpenCode.
+              How often the dashboard reloads Cursor, Grok, Claude, and OpenCode.
             </CardDescription>
           </CardHeader>
           <CardContent>
