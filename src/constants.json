@@ -8,7 +8,7 @@
     },
     "appName": "Quota",
     "appIcon": "gauge",
-    "tagline": "Cursor, Grok, and Claude usage on one page",
+    "tagline": "Cursor, Grok, Claude, and other CLI usage on one page",
     "cta": "Get Started",
     "ctaHeading": "Ready to Get Started?",
     "noLogin": true,

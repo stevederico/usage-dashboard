@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import {
   clampPercent,
   formatReset,
+  formatTokenCount,
   parseClaudeCache,
   parseCursorUsage,
   parseGrokBilling,
+  parseOpenCodeTotals,
   planLabelFromTier,
 } from './quotas.ts';
 
@@ -70,6 +72,24 @@ describe('parseCursorUsage', () => {
     assert.equal(plan.usedPercent, 12.5);
     assert.equal(plan.bars[0]?.label, 'Cursor Models');
     assert.equal(plan.bars[1]?.usedPercent, 3);
+  });
+});
+
+describe('formatTokenCount', () => {
+  it('formats millions', () => {
+    assert.equal(formatTokenCount(4_373_448), '4.4M');
+  });
+});
+
+describe('parseOpenCodeTotals', () => {
+  it('reads cost and token stats', () => {
+    const plan = parseOpenCodeTotals([
+      { sessions: 25, cost: 0.63, input: 4373448, output: 151216 },
+    ]);
+    assert.equal(plan.ok, true);
+    assert.equal(plan.headline, '$0.63');
+    assert.equal(plan.stats[0]?.value, '25');
+    assert.equal(plan.stats[1]?.value, '4.4M');
   });
 });
 

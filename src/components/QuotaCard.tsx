@@ -17,6 +17,13 @@ export type QuotaBar = {
   resetsAt: string | null;
 };
 
+/** A non-percent metric row. */
+export type QuotaStat = {
+  id: string;
+  label: string;
+  value: string;
+};
+
 /** One subscription snapshot from GET /quotas. */
 export type PlanQuota = {
   id: string;
@@ -26,6 +33,8 @@ export type PlanQuota = {
   error: string | null;
   source: string;
   usedPercent: number | null;
+  headline?: string | null;
+  stats?: QuotaStat[];
   resetsAt: string | null;
   bars: QuotaBar[];
 };
@@ -55,6 +64,8 @@ function usedTone(used: number): string {
  */
 export default function QuotaCard({ plan, resetLabel }: QuotaCardProps) {
   const used = plan.usedPercent;
+  const headline = plan.headline ?? null;
+  const stats = plan.stats ?? [];
   return (
     <Card>
       <CardHeader>
@@ -67,6 +78,8 @@ export default function QuotaCard({ plan, resetLabel }: QuotaCardProps) {
             <p className={cn('text-heading-lg tabular-nums', usedTone(used))}>
               {Math.round(used)}%
             </p>
+          ) : headline ? (
+            <p className="text-heading-lg tabular-nums">{headline}</p>
           ) : (
             <Badge variant="outline">Offline</Badge>
           )}
@@ -76,6 +89,12 @@ export default function QuotaCard({ plan, resetLabel }: QuotaCardProps) {
         {plan.error ? (
           <p className="text-copy-sm text-destructive">{plan.error}</p>
         ) : null}
+        {stats.map((stat) => (
+          <div key={stat.id} className="flex items-center justify-between gap-2">
+            <p className="text-label-sm">{stat.label}</p>
+            <p className="text-copy-sm text-muted-foreground tabular-nums">{stat.value}</p>
+          </div>
+        ))}
         {plan.bars.map((bar) => {
           const reset = resetLabel(bar.resetsAt);
           return (

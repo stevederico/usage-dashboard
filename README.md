@@ -1,6 +1,6 @@
 <div align="center">
   <h1>Quota</h1>
-  <h3>Cursor Ultra, SuperGrok Heavy, and Claude Max usage on one local page</h3>
+  <h3>Local CLI usage on one page</h3>
 </div>
 
 <br />
@@ -12,6 +12,7 @@ Reads usage from the CLIs already signed in on this machine. Nothing is uploaded
 | Cursor Ultra | Cursor app token in `state.vscdb` |
 | SuperGrok Heavy | `grok` CLI billing (`~/.grok/auth.json`) |
 | Claude Max 5x | Claude Code `~/.claude.json` (run `/usage` in `claude` to refresh) |
+| OpenCode | `opencode db` (shown only if the binary is installed) |
 
 ## Run
 

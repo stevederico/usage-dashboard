@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { accessSync, constants as fsConstants } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
@@ -17,17 +18,36 @@ export type QuotaBar = {
   resetsAt: string | null;
 };
 
+/** A non-percent metric row (sessions, tokens, cost). */
+export type QuotaStat = {
+  id: string;
+  label: string;
+  value: string;
+};
+
 /** One subscription's quota snapshot. */
 export type PlanQuota = {
-  id: 'cursor' | 'grok' | 'claude';
+  id: string;
   name: string;
   plan: string;
   ok: boolean;
   error: string | null;
   source: string;
   usedPercent: number | null;
+  headline: string | null;
+  stats: QuotaStat[];
   resetsAt: string | null;
   bars: QuotaBar[];
+};
+
+/** CLI provider. Optional ones appear only when the binary exists. */
+type QuotaProvider = {
+  id: string;
+  name: string;
+  plan: string;
+  optional: boolean;
+  detect: (home: string) => string | null;
+  fetch: (home: string, bin: string | null) => Promise<PlanQuota>;
 };
 
 /** GET /api/quotas payload. */
@@ -45,6 +65,50 @@ export type QuotasResponse = {
 export function clampPercent(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.min(100, Math.max(0, value));
+}
+
+/**
+ * Compact token count for a card (1.2K, 4.4M).
+ *
+ * @param value - Token count
+ * @returns Short label
+ */
+export function formatTokenCount(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return '0';
+  if (value < 1000) return String(Math.round(value));
+  if (value < 1_000_000) return `${(value / 1000).toFixed(value < 10_000 ? 1 : 0)}K`;
+  return `${(value / 1_000_000).toFixed(value < 10_000_000 ? 1 : 0)}M`;
+}
+
+/**
+ * True when a path is an executable file.
+ *
+ * @param path - Absolute path
+ * @returns Whether the file is executable
+ */
+function isExecutable(path: string): boolean {
+  try {
+    accessSync(path, fsConstants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * First existing OpenCode binary.
+ *
+ * @param home - Home directory
+ * @returns Absolute path, or null
+ */
+export function findOpenCodeBin(home = homedir()): string | null {
+  const candidates = [
+    join(home, '.opencode/bin/opencode'),
+    join(home, '.local/bin/opencode'),
+    '/opt/homebrew/bin/opencode',
+    '/usr/local/bin/opencode',
+  ];
+  return candidates.find(isExecutable) ?? null;
 }
 
 /**
@@ -165,6 +229,8 @@ export function parseGrokBilling(raw: unknown): PlanQuota {
     error: null,
     source: 'grok CLI billing',
     usedPercent: clampPercent(used ?? 0),
+    headline: null,
+    stats: [],
     resetsAt: end,
     bars,
   };
@@ -196,6 +262,8 @@ export function parseCursorUsage(raw: unknown): PlanQuota {
     error: null,
     source: 'Cursor app token',
     usedPercent: clampPercent(totalPct),
+    headline: null,
+    stats: [],
     resetsAt: end,
     bars: [
       {
@@ -288,6 +356,8 @@ export function parseClaudeCache(raw: unknown): PlanQuota {
     error: stale ? 'Claude Code cache is older than 6h. Run /usage in claude.' : null,
     source: 'Claude Code ~/.claude.json',
     usedPercent: clampPercent(weekPct ?? sessionPct ?? 0),
+    headline: null,
+    stats: [],
     resetsAt: weekReset ?? sessionReset,
     bars,
   };
@@ -316,6 +386,42 @@ function failPlan(
     error,
     source: '',
     usedPercent: null,
+    headline: null,
+    stats: [],
+    resetsAt: null,
+    bars: [],
+  };
+}
+
+/**
+ * Parse `opencode db` JSON totals.
+ *
+ * @param raw - Query result (array of one row or a row)
+ * @returns Plan quota
+ */
+export function parseOpenCodeTotals(raw: unknown): PlanQuota {
+  const row = Array.isArray(raw) ? asObject(raw[0]) : asObject(raw);
+  if (!row) {
+    return failPlan('opencode', 'OpenCode', 'CLI', 'opencode db returned no totals');
+  }
+  const sessions = num(row, 'sessions') ?? 0;
+  const cost = num(row, 'cost') ?? 0;
+  const input = num(row, 'input') ?? 0;
+  const output = num(row, 'output') ?? 0;
+  return {
+    id: 'opencode',
+    name: 'OpenCode',
+    plan: 'CLI',
+    ok: true,
+    error: null,
+    source: 'opencode db',
+    usedPercent: null,
+    headline: `$${cost.toFixed(2)}`,
+    stats: [
+      { id: 'sessions', label: 'Sessions', value: String(Math.round(sessions)) },
+      { id: 'input', label: 'Input', value: formatTokenCount(input) },
+      { id: 'output', label: 'Output', value: formatTokenCount(output) },
+    ],
     resetsAt: null,
     bars: [],
   };
@@ -468,25 +574,87 @@ export async function fetchClaudeQuota(home = homedir()): Promise<PlanQuota> {
 }
 
 /**
- * Load all three plan quotas in parallel.
+ * Fetch OpenCode all-time session cost/tokens via `opencode db`.
+ *
+ * @param _home - Unused home dir
+ * @param bin - OpenCode binary
+ * @returns Plan quota
+ */
+export async function fetchOpenCodeQuota(
+  _home: string,
+  bin: string | null
+): Promise<PlanQuota> {
+  if (!bin) {
+    return failPlan('opencode', 'OpenCode', 'CLI', 'opencode binary not found');
+  }
+  const sql =
+    'SELECT COUNT(*) AS sessions, COALESCE(SUM(cost),0) AS cost, COALESCE(SUM(tokens_input),0) AS input, COALESCE(SUM(tokens_output),0) AS output FROM session';
+  const { stdout } = await execFileAsync(bin, ['db', '--format', 'json', sql], {
+    timeout: FETCH_MS,
+    env: process.env,
+  });
+  return parseOpenCodeTotals(JSON.parse(stdout) as unknown);
+}
+
+const PROVIDERS: QuotaProvider[] = [
+  {
+    id: 'cursor',
+    name: 'Cursor',
+    plan: 'Ultra',
+    optional: false,
+    detect: () => 'ok',
+    fetch: (home) => fetchCursorQuota(home),
+  },
+  {
+    id: 'grok',
+    name: 'Grok',
+    plan: 'SuperGrok Heavy',
+    optional: false,
+    detect: () => 'ok',
+    fetch: (home) => fetchGrokQuota(home),
+  },
+  {
+    id: 'claude',
+    name: 'Claude',
+    plan: 'Max 5x',
+    optional: false,
+    detect: () => 'ok',
+    fetch: (home) => fetchClaudeQuota(home),
+  },
+  {
+    id: 'opencode',
+    name: 'OpenCode',
+    plan: 'CLI',
+    optional: true,
+    detect: (home) => findOpenCodeBin(home),
+    fetch: (home, bin) => fetchOpenCodeQuota(home, bin),
+  },
+];
+
+/**
+ * Load quotas for every detected CLI.
  *
  * @param home - Home directory
  * @returns Dashboard payload
  */
 export async function loadQuotas(home = homedir()): Promise<QuotasResponse> {
-  const [cursor, grok, claude] = await Promise.all([
-    fetchCursorQuota(home).catch((err: unknown) =>
-      failPlan('cursor', 'Cursor', 'Ultra', err instanceof Error ? err.message : String(err))
-    ),
-    fetchGrokQuota(home).catch((err: unknown) =>
-      failPlan('grok', 'Grok', 'SuperGrok Heavy', err instanceof Error ? err.message : String(err))
-    ),
-    fetchClaudeQuota(home).catch((err: unknown) =>
-      failPlan('claude', 'Claude', 'Max 5x', err instanceof Error ? err.message : String(err))
-    ),
-  ]);
+  const jobs = PROVIDERS.flatMap((provider) => {
+    const bin = provider.detect(home);
+    if (!bin && provider.optional) return [];
+    return [
+      provider.fetch(home, bin).catch((err: unknown) =>
+        failPlan(
+          provider.id,
+          provider.name,
+          provider.plan,
+          err instanceof Error ? err.message : String(err)
+        )
+      ),
+    ];
+  });
+  const plans = await Promise.all(jobs);
   return {
     fetchedAt: new Date().toISOString(),
-    plans: [cursor, grok, claude],
+    plans,
   };
 }

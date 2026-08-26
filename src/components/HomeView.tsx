@@ -34,7 +34,7 @@ export default function HomeView() {
           <p className="text-copy-md text-destructive">{error}</p>
         ) : null}
         {payload ? (
-          <section className="grid gap-4 md:grid-cols-3">
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {payload.plans.map((plan) => (
               <QuotaCard key={plan.id} plan={plan} resetLabel={formatReset} />
             ))}
@@ -63,8 +63,8 @@ function isQuotas(value: unknown): value is QuotasResponse {
  */
 function HomeGridSkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-3" aria-busy="true">
-      {Array.from({ length: 3 }).map((_, i) => (
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+      {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="flex flex-col gap-3 rounded-xl border border-border p-6">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-8 w-20" />

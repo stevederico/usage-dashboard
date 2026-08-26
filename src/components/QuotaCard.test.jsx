@@ -28,4 +28,28 @@ describe('QuotaCard', () => {
     expect(screen.getByText('Grok')).toBeInTheDocument();
     expect(screen.getByText('84%')).toBeInTheDocument();
   });
+
+  it('shows headline and stats when there is no percent cap', () => {
+    render(
+      <QuotaCard
+        plan={{
+          id: 'opencode',
+          name: 'OpenCode',
+          plan: 'CLI',
+          ok: true,
+          error: null,
+          source: 'opencode db',
+          usedPercent: null,
+          headline: '$0.63',
+          stats: [{ id: 'sessions', label: 'Sessions', value: '25' }],
+          resetsAt: null,
+          bars: [],
+        }}
+        resetLabel={() => null}
+      />
+    );
+    expect(screen.getByText('$0.63')).toBeInTheDocument();
+    expect(screen.getByText('Sessions')).toBeInTheDocument();
+    expect(screen.getByText('25')).toBeInTheDocument();
+  });
 });
