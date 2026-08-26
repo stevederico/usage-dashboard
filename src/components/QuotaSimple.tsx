@@ -44,14 +44,10 @@ export default function QuotaSimple({ plans }: QuotaSimpleProps) {
                 {value}
               </p>
             </div>
-            {used !== null ? (
-              <Progress
-                value={used}
-                aria-label={`${plan.name} ${value} used`}
-              />
-            ) : (
-              <div className="bg-border h-0.5" />
-            )}
+            <Progress
+              value={used ?? 0}
+              aria-label={`${plan.name} ${value} used`}
+            />
           </div>
         );
       })}

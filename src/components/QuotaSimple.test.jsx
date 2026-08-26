@@ -36,10 +36,11 @@ const plans = [
 
 describe('QuotaSimple', () => {
   it('stacks service names and values', () => {
-    render(<QuotaSimple plans={plans} />);
+    const { container } = render(<QuotaSimple plans={plans} />);
     expect(screen.getByText('Grok')).toBeInTheDocument();
     expect(screen.getByText('86%')).toBeInTheDocument();
     expect(screen.getByText('OpenCode')).toBeInTheDocument();
     expect(screen.getByText('$0.63')).toBeInTheDocument();
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(2);
   });
 });
