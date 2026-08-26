@@ -47,6 +47,7 @@ export default function QuotaSimple({ plans }: QuotaSimpleProps) {
             <Progress
               value={used ?? 0}
               aria-label={`${plan.name} ${value} used`}
+              className="[&_[data-slot=progress-track]]:bg-foreground/30"
             />
           </div>
         );
