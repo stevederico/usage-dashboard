@@ -26,7 +26,8 @@ describe('QuotaCard', () => {
   it('shows plan name and used percent', () => {
     render(<QuotaCard plan={plan} resetLabel={() => '1d'} />);
     expect(screen.getByText('Grok')).toBeInTheDocument();
-    expect(screen.getByText('84%')).toBeInTheDocument();
+    expect(screen.getByText('Limits')).toBeInTheDocument();
+    expect(screen.getByText('Weekly Pool')).toBeInTheDocument();
   });
 
   it('shows headline and stats when there is no percent cap', () => {

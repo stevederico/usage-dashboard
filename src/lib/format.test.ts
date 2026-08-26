@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatPlanValue, formatReset } from './format';
+import { formatPlanValue, formatReset, weekdayLabel } from './format';
 
 describe('formatReset', () => {
   it('formats a full day as 1d', () => {
@@ -26,5 +26,12 @@ describe('formatPlanValue', () => {
   it('falls back to headline then dash', () => {
     expect(formatPlanValue({ usedPercent: null, headline: '$0.63' })).toBe('$0.63');
     expect(formatPlanValue({ usedPercent: null })).toBe('-');
+  });
+});
+
+describe('weekdayLabel', () => {
+  it('labels today as Today', () => {
+    const now = new Date(2026, 7, 26, 15).getTime();
+    expect(weekdayLabel('2026-08-26', now)).toBe('Today');
   });
 });

@@ -25,6 +25,7 @@ import CommandMenu from './components/CommandMenu';
 import HomeViewSkeleton from './components/HomeViewSkeleton';
 import constants from './constants.json';
 const HomeView = lazy(() => import('./components/HomeView'));
+import SettingsView from './components/SettingsView';
 import ChatView from './components/ChatView';
 import BlankView from './components/BlankView';
 import CalendarTestView from './components/CalendarTestView';
@@ -80,7 +81,7 @@ createSkateboardApp({
   constants,
   appRoutes,
   defaultRoute: 'home',
-  overrides: { layout: AppLayout }
+  overrides: { layout: AppLayout, settings: SettingsView }
 });
 
 /** Preload HomeView chunk after initial render for instant navigation */

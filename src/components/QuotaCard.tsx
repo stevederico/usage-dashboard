@@ -8,6 +8,7 @@ import {
 import { Progress } from '@stevederico/skateboard-ui/shadcn/ui/progress';
 import { Badge } from '@stevederico/skateboard-ui/shadcn/ui/badge';
 import { cn } from '@stevederico/skateboard-ui/shadcn/lib/utils';
+import { formatTokenCount, weekdayLabel } from '../lib/format';
 
 /** One usage bar on a plan card. */
 export type QuotaBar = {
@@ -37,6 +38,8 @@ export type PlanQuota = {
   stats?: QuotaStat[];
   resetsAt: string | null;
   bars: QuotaBar[];
+  recentDays?: { date: string; tokens: number }[];
+  models?: { name: string; total: number }[];
 };
 
 type QuotaCardProps = {
@@ -57,7 +60,19 @@ function usedTone(used: number): string {
 }
 
 /**
- * Plan usage card with percent bars.
+ * Section heading matching the Omarchy agents pane.
+ *
+ * @param props - Title
+ * @returns Heading
+ */
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <p className="text-label-sm text-muted-foreground tracking-wide">{children}</p>
+  );
+}
+
+/**
+ * Advanced plan card: limits, daily tokens, and models.
  *
  * @param props - Plan + reset formatter
  * @returns Card
@@ -66,6 +81,11 @@ export default function QuotaCard({ plan, resetLabel }: QuotaCardProps) {
   const used = plan.usedPercent;
   const headline = plan.headline ?? null;
   const stats = plan.stats ?? [];
+  const days = plan.recentDays ?? [];
+  const models = plan.models ?? [];
+  const dayPeak = Math.max(1, ...days.map((d) => d.tokens));
+  const modelPeak = Math.max(1, models[0]?.total ?? 1);
+
   return (
     <Card>
       <CardHeader>
@@ -85,34 +105,92 @@ export default function QuotaCard({ plan, resetLabel }: QuotaCardProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-6">
         {plan.error ? (
           <p className="text-copy-sm text-destructive">{plan.error}</p>
         ) : null}
-        {stats.map((stat) => (
-          <div key={stat.id} className="flex items-center justify-between gap-2">
-            <p className="text-label-sm">{stat.label}</p>
-            <p className="text-copy-sm text-muted-foreground tabular-nums">{stat.value}</p>
-          </div>
-        ))}
-        {plan.bars.map((bar) => {
-          const reset = resetLabel(bar.resetsAt);
-          return (
-            <div key={bar.id} className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-label-sm">{bar.label}</p>
-                <p className="text-copy-sm text-muted-foreground tabular-nums">
-                  {Math.round(bar.usedPercent)}%
-                  {reset ? ` · ${reset}` : ''}
-                </p>
+
+        {stats.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <SectionTitle>Balance</SectionTitle>
+            {stats.map((stat) => (
+              <div key={stat.id} className="flex items-center justify-between gap-2">
+                <p className="text-label-sm">{stat.label}</p>
+                <p className="text-copy-sm text-muted-foreground tabular-nums">{stat.value}</p>
               </div>
-              <Progress
-                value={bar.usedPercent}
-                aria-label={`${bar.label} ${Math.round(bar.usedPercent)} percent used`}
-              />
-            </div>
-          );
-        })}
+            ))}
+          </div>
+        ) : null}
+
+        {plan.bars.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <SectionTitle>Limits</SectionTitle>
+            {plan.bars.map((bar) => {
+              const reset = resetLabel(bar.resetsAt);
+              return (
+                <div key={bar.id} className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-label-sm">{bar.label}</p>
+                    <p className={cn('text-copy-sm tabular-nums', usedTone(bar.usedPercent))}>
+                      {Math.round(bar.usedPercent)}%
+                    </p>
+                  </div>
+                  <Progress
+                    value={bar.usedPercent}
+                    aria-label={`${bar.label} ${Math.round(bar.usedPercent)} percent used`}
+                    className="[&_[data-slot=progress-track]]:bg-foreground/30"
+                  />
+                  {reset ? (
+                    <p className="text-copy-sm text-muted-foreground">Resets In {reset}</p>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+
+        {days.some((d) => d.tokens > 0) ? (
+          <div className="flex flex-col gap-3">
+            <SectionTitle>Tokens By Day</SectionTitle>
+            {days.map((day) => (
+              <div key={day.date} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-label-sm">{weekdayLabel(day.date)}</p>
+                  <p className="text-copy-sm text-muted-foreground tabular-nums">
+                    {formatTokenCount(day.tokens)}
+                  </p>
+                </div>
+                <Progress
+                  value={(day.tokens / dayPeak) * 100}
+                  aria-label={`${day.date} ${formatTokenCount(day.tokens)} tokens`}
+                  className="[&_[data-slot=progress-track]]:bg-foreground/30"
+                />
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {models.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <SectionTitle>Tokens By Model</SectionTitle>
+            {models.map((model) => (
+              <div key={model.name} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-label-sm capitalize">{model.name}</p>
+                  <p className="text-copy-sm text-muted-foreground tabular-nums">
+                    {formatTokenCount(model.total)}
+                  </p>
+                </div>
+                <Progress
+                  value={(model.total / modelPeak) * 100}
+                  aria-label={`${model.name} ${formatTokenCount(model.total)} tokens`}
+                  className="[&_[data-slot=progress-track]]:bg-foreground/30"
+                />
+              </div>
+            ))}
+          </div>
+        ) : null}
+
         {plan.source ? (
           <p className="text-copy-sm text-muted-foreground">{plan.source}</p>
         ) : null}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '@stevederico/skateboard-ui/Header';
 import { useListData } from '@stevederico/skateboard-ui/Utilities';
 import { Button } from '@stevederico/skateboard-ui/shadcn/ui/button';
@@ -12,6 +12,7 @@ import QuotaCard from './QuotaCard';
 import QuotaSimple from './QuotaSimple';
 import type { PlanQuota } from './QuotaCard';
 import { formatReset } from '../lib/format';
+import { readRefreshMs, SETTINGS_EVENT } from '../lib/settings';
 
 const MODE_KEY = 'quota-mode';
 
@@ -43,6 +44,21 @@ export default function HomeView() {
   const { data, loading, error, refetch } = useListData('/quotas');
   const payload = isQuotas(data) ? data : null;
   const [mode, setMode] = useState<'simple' | 'advanced'>(readMode);
+  const [refreshMs, setRefreshMs] = useState(readRefreshMs);
+
+  useEffect(() => {
+    const sync = () => setRefreshMs(readRefreshMs());
+    window.addEventListener(SETTINGS_EVENT, sync);
+    return () => window.removeEventListener(SETTINGS_EVENT, sync);
+  }, []);
+
+  useEffect(() => {
+    if (refreshMs <= 0) return undefined;
+    const id = window.setInterval(() => {
+      void refetch();
+    }, refreshMs);
+    return () => window.clearInterval(id);
+  }, [refreshMs, refetch]);
 
   const handleMode = (value: string) => {
     const next = value === 'advanced' ? 'advanced' : 'simple';

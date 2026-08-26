@@ -37,6 +37,10 @@ vi.mock('./components/CalendarTestView.jsx', () => ({
   default: () => <div data-testid="calendar-test-view">Calendar</div>
 }));
 
+vi.mock('./components/SettingsView.jsx', () => ({
+  default: () => <div data-testid="settings-view">Settings</div>
+}));
+
 vi.mock('./constants.json', () => ({
   default: {
     appName: 'Test App',
@@ -62,7 +66,7 @@ describe('main app bootstrap', () => {
       constants: expect.objectContaining({ appName: 'Test App' }),
       appRoutes: expect.any(Array),
       defaultRoute: 'home',
-      overrides: { layout: expect.any(Function) }
+      overrides: { layout: expect.any(Function), settings: expect.any(Function) }
     });
 
     expect(main.appRoutes).toHaveLength(6);

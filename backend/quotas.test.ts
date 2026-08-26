@@ -6,6 +6,7 @@ import {
   formatTokenCount,
   parseClaudeCache,
   parseClaudeOauthUsage,
+  parseClaudeStatsCache,
   parseCursorUsage,
   parseGrokBilling,
   parseOpenCodeTotals,
@@ -160,6 +161,31 @@ describe('parseClaudeCache', () => {
     assert.equal(plan.usedPercent, null);
     assert.match(plan.error ?? '', /login/i);
     assert.doesNotMatch(plan.error ?? '', /\/usage/i);
+  });
+});
+
+describe('parseClaudeStatsCache', () => {
+  it('fills last 7 days and top models', () => {
+    const extra = parseClaudeStatsCache(
+      {
+        dailyModelTokens: [
+          { date: '2026-08-26', tokensByModel: { 'claude-opus-4-8': 1000 } },
+        ],
+        modelUsage: {
+          'claude-opus-4-8': {
+            inputTokens: 100,
+            outputTokens: 50,
+            cacheReadInputTokens: 10,
+            cacheCreationInputTokens: 5,
+          },
+        },
+      },
+      new Date(2026, 7, 26, 15).getTime()
+    );
+    assert.equal(extra.recentDays.length, 7);
+    assert.equal(extra.recentDays[6]?.date, '2026-08-26');
+    assert.equal(extra.models[0]?.name, 'opus 4 8');
+    assert.equal(extra.models[0]?.total, 165);
   });
 });
 

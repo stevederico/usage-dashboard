@@ -38,6 +38,8 @@ export type PlanQuota = {
   stats: QuotaStat[];
   resetsAt: string | null;
   bars: QuotaBar[];
+  recentDays?: { date: string; tokens: number }[];
+  models?: { name: string; total: number }[];
 };
 
 /** CLI provider. Optional ones appear only when the binary exists. */
@@ -78,6 +80,95 @@ export function formatTokenCount(value: number): string {
   if (value < 1000) return String(Math.round(value));
   if (value < 1_000_000) return `${(value / 1000).toFixed(value < 10_000 ? 1 : 0)}K`;
   return `${(value / 1_000_000).toFixed(value < 10_000_000 ? 1 : 0)}M`;
+}
+
+/**
+ * Short model label from a Claude or OpenCode model id.
+ *
+ * @param id - Raw model id or OpenCode JSON blob
+ * @returns Display name
+ */
+export function friendlyModelName(id: string): string {
+  let raw = id;
+  if (raw.startsWith('{')) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      const obj = asObject(parsed);
+      const nested = obj ? str(obj, 'id') : null;
+      if (nested) raw = nested;
+    } catch {
+      // Keep the raw string.
+    }
+  }
+  return raw.replace(/^claude-/, '').replace(/-\d{8}$/, '').replace(/-/g, ' ');
+}
+
+/**
+ * Last 7 local calendar dates, oldest first.
+ *
+ * @param now - Reference time
+ * @returns YYYY-MM-DD dates
+ */
+export function lastSevenDates(now = Date.now()): string[] {
+  const out: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    out.push(`${d.getFullYear()}-${m}-${day}`);
+  }
+  return out;
+}
+
+/**
+ * Tokens by day and top models from Claude Code stats-cache.json.
+ *
+ * @param raw - Cache JSON
+ * @param now - Reference time
+ * @returns Day and model rollups
+ */
+export function parseClaudeStatsCache(
+  raw: unknown,
+  now = Date.now()
+): { recentDays: { date: string; tokens: number }[]; models: { name: string; total: number }[] } {
+  const root = asObject(raw);
+  const byDate = new Map<string, number>();
+  const dayRows = Array.isArray(root?.dailyModelTokens) ? root.dailyModelTokens : [];
+  for (const item of dayRows) {
+    const row = asObject(item);
+    if (!row) continue;
+    const date = str(row, 'date');
+    const byModel = asObject(row.tokensByModel);
+    if (!date || !byModel) continue;
+    let total = 0;
+    for (const value of Object.values(byModel)) {
+      if (typeof value === 'number' && Number.isFinite(value)) total += value;
+    }
+    byDate.set(date, total);
+  }
+  const recentDays = lastSevenDates(now).map((date) => ({
+    date,
+    tokens: byDate.get(date) ?? 0,
+  }));
+  const usage = asObject(root?.modelUsage);
+  const models: { name: string; total: number }[] = [];
+  if (usage) {
+    for (const [id, value] of Object.entries(usage)) {
+      const row = asObject(value);
+      if (!row) continue;
+      const input = num(row, 'inputTokens') ?? 0;
+      const output = num(row, 'outputTokens') ?? 0;
+      const cacheRead = num(row, 'cacheReadInputTokens') ?? 0;
+      const cacheWrite = num(row, 'cacheCreationInputTokens') ?? 0;
+      models.push({
+        name: friendlyModelName(id),
+        total: input + output + cacheRead + cacheWrite,
+      });
+    }
+  }
+  models.sort((a, b) => b.total - a.total);
+  return { recentDays, models: models.slice(0, 4) };
 }
 
 /**
@@ -672,9 +763,26 @@ export async function fetchClaudeQuota(home = homedir()): Promise<PlanQuota> {
         Accept: 'application/json',
       },
     });
-    return parseClaudeOauthUsage(live, cached.plan);
+    return attachClaudeStats(parseClaudeOauthUsage(live, cached.plan), home);
   }
-  return cached;
+  return attachClaudeStats(cached, home);
+}
+
+/**
+ * Attach last-week tokens from Claude Code stats-cache.json.
+ *
+ * @param plan - Quota row
+ * @param home - Home directory
+ * @returns Plan with day and model rollups
+ */
+async function attachClaudeStats(plan: PlanQuota, home: string): Promise<PlanQuota> {
+  try {
+    const raw = await readFile(join(home, '.claude/stats-cache.json'), 'utf8');
+    const extra = parseClaudeStatsCache(JSON.parse(raw) as unknown);
+    return { ...plan, ...extra };
+  } catch {
+    return plan;
+  }
 }
 
 /**
@@ -697,7 +805,56 @@ export async function fetchOpenCodeQuota(
     timeout: FETCH_MS,
     env: process.env,
   });
-  return parseOpenCodeTotals(JSON.parse(stdout) as unknown);
+  const plan = parseOpenCodeTotals(JSON.parse(stdout) as unknown);
+  const extra = await fetchOpenCodeBreakdown(bin);
+  return { ...plan, ...extra };
+}
+
+/**
+ * Last 7 days and top models from OpenCode's session table.
+ *
+ * @param bin - OpenCode binary
+ * @returns Day and model rollups
+ */
+async function fetchOpenCodeBreakdown(
+  bin: string
+): Promise<{ recentDays: { date: string; tokens: number }[]; models: { name: string; total: number }[] }> {
+  const daySql =
+    "SELECT date(time_created/1000,'unixepoch','localtime') AS date, COALESCE(SUM(tokens_input+tokens_output+tokens_cache_read+tokens_cache_write),0) AS tokens FROM session WHERE time_created >= (strftime('%s','now','-7 days') * 1000) GROUP BY date";
+  const modelSql =
+    'SELECT model AS name, COALESCE(SUM(tokens_input+tokens_output+tokens_cache_read+tokens_cache_write),0) AS total FROM session GROUP BY model ORDER BY total DESC LIMIT 4';
+  const [daysOut, modelsOut] = await Promise.all([
+    execFileAsync(bin, ['db', '--format', 'json', daySql], { timeout: FETCH_MS, env: process.env }),
+    execFileAsync(bin, ['db', '--format', 'json', modelSql], { timeout: FETCH_MS, env: process.env }),
+  ]);
+  const byDate = new Map<string, number>();
+  const dayRaw: unknown = JSON.parse(daysOut.stdout);
+  if (Array.isArray(dayRaw)) {
+    for (const item of dayRaw) {
+      const row = asObject(item);
+      if (!row) continue;
+      const date = str(row, 'date');
+      const tokens = num(row, 'tokens');
+      if (date && tokens !== null) byDate.set(date, tokens);
+    }
+  }
+  const recentDays = lastSevenDates().map((date) => ({
+    date,
+    tokens: byDate.get(date) ?? 0,
+  }));
+  const models: { name: string; total: number }[] = [];
+  const modelRaw: unknown = JSON.parse(modelsOut.stdout);
+  if (Array.isArray(modelRaw)) {
+    for (const item of modelRaw) {
+      const row = asObject(item);
+      if (!row) continue;
+      const name = str(row, 'name');
+      const total = num(row, 'total');
+      if (!name || total === null) continue;
+      models.push({ name: friendlyModelName(name), total });
+    }
+  }
+  return { recentDays, models };
 }
 
 const PROVIDERS: QuotaProvider[] = [
