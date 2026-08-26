@@ -1,0 +1,45 @@
+# Deno
+deno.lock
+deno.json
+deno.jsonc
+.deno/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Environment — never bake secrets (symlinks to shared secret files are the classic leak)
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Build artifacts
+dist/
+build/
+backend/coverage/
+
+# Local data — never bake into railway up images
+backend/databases/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+uploads/
+**/uploads/
+
+# Misc
+*.md
+*.log
+.DS_Store

@@ -1,0 +1,8 @@
+{
+  "staticDir": "../dist",
+  "database": {
+    "db": "Quota",
+    "dbType": "sqlite",
+    "connectionString": "./databases/Quota.db"
+  }
+}

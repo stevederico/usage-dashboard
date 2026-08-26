@@ -1,0 +1,17 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '../test/dom.js';
+import HomeViewSkeleton from './HomeViewSkeleton';
+
+vi.mock('@stevederico/skateboard-ui/ui/skeleton', () => ({
+  Skeleton: ({ className }) => <div data-testid="skeleton" className={className} />,
+}));
+
+describe('HomeViewSkeleton', () => {
+  it('renders dashboard-shaped skeleton placeholders', () => {
+    render(<HomeViewSkeleton />);
+
+    expect(screen.getByRole('generic', { busy: true })).toBeInTheDocument();
+    // Header bar + 3 cards × 3 lines each = 1 + 9 = 10 skeletons
+    expect(screen.getAllByTestId('skeleton')).toHaveLength(10);
+  });
+});
