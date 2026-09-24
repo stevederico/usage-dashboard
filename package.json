@@ -1,52 +1,41 @@
 {
   "name": "usage-dashboard",
   "private": false,
-  "version": "0.3.0",
-  "skateboardVersion": "4.15.0",
+  "version": "0.4.0",
+  "skateboardVersion": "5.6.0",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
   },
-  "workspaces": [
-    "backend"
-  ],
   "scripts": {
-    "start": "npm run front & npm run server",
-    "front": "vite --force --mode development",
-    "server": "node --watch backend/server.ts",
+    "start": "vite --mode development",
+    "front": "vite --mode development",
     "build": "npm run typecheck && vite build --mode production",
     "prod": "npm run typecheck && vite build --mode production",
-    "install-all": "npm install && npm install --workspace=backend",
+    "install-all": "npm install",
     "postinstall": "git config core.hooksPath .githooks || true",
     "verify:ui": "node scripts/verify-ui-version.mjs",
-    "typecheck": "tsc -p tsconfig.json && tsc -p backend/tsconfig.json",
-    "test": "npm run typecheck && npm run test:backend && npm run test:frontend && npm run test:build",
-    "test:watch": "npm run --workspace=backend test:watch",
-    "test:backend": "npm run test --workspace=backend",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "npm run typecheck && npm run test:frontend && npm run test:build && npm run test:docs",
     "test:frontend": "vitest run",
     "test:build": "node --experimental-test-module-mocks --test vite.plugins.test.js scripts/verify-ui-version.test.js scripts/update-skateboard.test.js scripts/version-consistency.test.js",
-    "test:coverage": "npm run test:coverage:backend && npm run test:coverage:frontend && npm run test:coverage:build",
-    "test:coverage:backend": "node --experimental-test-module-mocks --experimental-test-coverage --test-concurrency=1 --test backend/server.test.ts backend/server.lifecycle.test.js backend/server.prod-import.test.js backend/adapters/*.test.js backend/lib/*.test.js",
-    "test:coverage:frontend": "vitest run --coverage",
-    "test:coverage:build": "node --experimental-test-module-mocks --experimental-test-coverage --test vite.plugins.test.js scripts/verify-ui-version.test.js"
+    "test:docs": "node scripts/test-docs.mjs"
   },
   "dependencies": {
-    "@stevederico/skateboard-ui": "4.14.0",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "react-router": "7.15.0"
+    "@stevederico/skateboard-ui": "5.1.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "lucide-react": "0.546.0"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "4.3.0",
-    "@types/node": "25.9.1",
-    "@types/react": "19.2.16",
-    "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react-swc": "4.3.1",
-    "@vitest/coverage-v8": "^3.2.4",
-    "jsdom": "^26.1.0",
-    "tailwindcss": "4.3.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "25.9.5",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "tailwindcss": "4.3.3",
+    "jsdom": "26.1.0",
     "typescript": "7.0.2",
-    "vite": "8.0.13",
-    "vitest": "^3.2.4"
+    "vite": "8.2.2",
+    "vitest": "3.2.6"
   }
 }

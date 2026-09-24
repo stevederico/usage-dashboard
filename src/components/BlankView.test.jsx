@@ -18,7 +18,7 @@ vi.mock('@stevederico/skateboard-ui/shadcn/ui/empty', () => ({
   EmptyDescription: ({ children }) => <p>{children}</p>
 }));
 
-vi.mock('@stevederico/skateboard-ui/icons', () => ({
+vi.mock('lucide-react', () => ({
   LayoutDashboard: () => <span data-testid="default-icon" />,
   Plus: () => <span data-testid="plus-icon" />
 }));

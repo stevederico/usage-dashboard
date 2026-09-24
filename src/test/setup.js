@@ -1,6 +1,33 @@
 import { afterEach, expect } from 'vitest';
 import { cleanup } from './dom.js';
 
+// Node exposes a localStorage global that is empty unless --localstorage-file
+// is set, and that binding shadows jsdom. Tests need a real Storage.
+if (typeof globalThis.localStorage?.clear !== 'function') {
+  const store = new Map();
+  const memory = {
+    getItem: (key) => (store.has(String(key)) ? store.get(String(key)) : null),
+    setItem: (key, value) => {
+      store.set(String(key), String(value));
+    },
+    removeItem: (key) => {
+      store.delete(String(key));
+    },
+    clear: () => {
+      store.clear();
+    },
+    key: (index) => [...store.keys()][index] ?? null,
+    get length() {
+      return store.size;
+    },
+  };
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    writable: true,
+    value: memory,
+  });
+}
+
 Element.prototype.scrollIntoView = () => {};
 
 afterEach(() => {
