@@ -1,6 +1,12 @@
 - Add Codex collector
 - Add Gemini collector
 
+0.4.0
+
+  Migrate skateboard 5.6
+  Port quota collectors
+  Add Linux Cursor path
+
 0.3.0
 
   Update project tagline

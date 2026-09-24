@@ -49,7 +49,7 @@ Click **Get Started**, then open **Usage**. Sign the CLIs in first (`grok login`
 
 ### 🔒 **Local Only**
 - **No cookies, no cloud account** — tokens already on disk / keychain
-- **Nothing is uploaded** — the Node process calls vendor APIs from this machine
+- **Nothing is uploaded** — the Rust process calls vendor APIs from this machine
 - **Optional providers stay hidden** until the binary exists
 
 <br />
@@ -75,7 +75,7 @@ No extra env for usage. Collectors read local auth:
 
 | Plan | Auth |
 |---|---|
-| Cursor | `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb` (`cursorAuth/accessToken`) |
+| Cursor | `state.vscdb` `cursorAuth/accessToken` (macOS `~/Library/Application Support/Cursor/...`, Linux `~/.config/Cursor/...`) |
 | Grok | `~/.grok/auth.json` (run `grok login` if expired) |
 | Claude | macOS keychain `Claude Code-credentials`, or `CLAUDE_CODE_OAUTH_TOKEN`; cache `~/.claude.json` |
 | OpenCode | `opencode` on PATH (or `~/.opencode/bin/opencode`) |
@@ -90,18 +90,17 @@ Claude `/usage` in the TUI does **not** write `cachedUsageUtilization`. Live oau
 |---|---|---|
 | **React** | 19 | Frontend UI |
 | **Vite** | 8 | Dev server / build |
-| **react-router** | 7 | App routes |
-| **Hono** | 4 | Backend HTTP (Node) |
 | **Tailwind CSS** | 4 | Styling |
-| **skateboard-ui** | 4.x | Shell, Header, shadcn |
-| **node:sqlite** | built-in | Cursor `state.vscdb` (read-only) |
-| **TypeScript** | 7 | Strict frontend + backend |
+| **skateboard-ui** | 5.1.0 | Shell, Header, shadcn |
+| **Rust** | zero-crate | Backend HTTP |
+| **libsqlite3** | system | App DB and Cursor `state.vscdb` |
+| **TypeScript** | 7 | Strict frontend |
 
 <br />
 
 ## 🏗️ Architecture
 
-A provider registry in `backend/quotas.ts` loads every plan in parallel. Each collector returns the same `PlanQuota` shape. `GET /api/quotas` is the only usage endpoint.
+A provider registry in `backend/src/quotas.rs` loads every plan in parallel. Each collector returns the same `PlanQuota` shape. `GET /api/quotas` is the only usage endpoint.
 
 ```
 Cursor vscdb token  ──► api2.cursor.sh DashboardService
@@ -121,9 +120,10 @@ Internal types, files, and the HTTP path still say `quota` (`QuotaCard`, `/api/q
 
 ```bash
 bun run test
+cd backend && cargo test --locked
 ```
 
-Backend Node tests cover parsers, Claude 429 fallback, missing-reset 0% windows, and OpenCode SQL. Frontend Vitest covers Simple rows, Advanced cards, and the 1 Hour default.
+`cargo test` covers parsers, Claude fallback, missing-reset 0% windows, and the Cursor token read. Frontend Vitest covers Simple rows, Advanced cards, and the 1 Hour default.
 
 <br />
 
@@ -156,7 +156,7 @@ Backend Node tests cover parsers, Claude 429 fallback, missing-reset 0% windows,
 <div align="center">
   Made with <a href="https://github.com/stevederico/skateboard">Skateboard</a> — a React boilerplate with auth and payments
   <br />
-  Built with React, Hono, and Tailwind
+  Built with React, Rust, and Tailwind
   <br />
   <a href="https://github.com/stevederico/usage-dashboard">Star this repo</a>
 </div>

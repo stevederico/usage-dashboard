@@ -9,16 +9,18 @@ const pages = [
 ];
 let contextState = { constants: { pages } };
 
-vi.mock('react-router', () => ({
-  useNavigate: () => navigate
+vi.mock('@stevederico/skateboard-ui/Utilities', () => ({
+  useSafeNavigate: () => navigate
 }));
 
 vi.mock('@stevederico/skateboard-ui/Context', () => ({
   getState: () => ({ state: contextState })
 }));
 
-vi.mock('@stevederico/skateboard-ui/DynamicIcon', () => ({
-  default: ({ name }) => <span data-testid={`icon-${name}`} />
+vi.mock('lucide-react', () => ({
+  Gauge: () => <span data-testid="icon-gauge" />,
+  LayoutDashboard: () => <span data-testid="icon-layout-dashboard" />,
+  ChartBar: () => <span data-testid="icon-chart-bar" />
 }));
 
 vi.mock('@stevederico/skateboard-ui/shadcn/ui/command', () => ({

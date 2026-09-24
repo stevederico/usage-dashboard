@@ -37,8 +37,8 @@ vi.mock('@stevederico/skateboard-ui/UpgradeSheet', () => ({
   default: vi.fn().mockImplementation(() => <div data-testid="upgrade-sheet" />)
 }));
 
-vi.mock('@stevederico/skateboard-ui/DynamicIcon', () => ({
-  default: () => <span data-testid="send-icon" />
+vi.mock('lucide-react', () => ({
+  ArrowUp: () => <span data-testid="send-icon" />
 }));
 
 vi.mock('@stevederico/skateboard-ui/shadcn/ui/input', () => ({

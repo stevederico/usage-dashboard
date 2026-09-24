@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '../test/dom.js';
 import { SectionCards } from './SectionCards.jsx';
 
-vi.mock('@stevederico/skateboard-ui/icons', () => ({
+vi.mock('lucide-react', () => ({
   TrendingUp: () => <span data-testid="trending-up" />,
   TrendingDown: () => <span data-testid="trending-down" />
 }));

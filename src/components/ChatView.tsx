@@ -1,6 +1,6 @@
 import Header from '@stevederico/skateboard-ui/Header';
 import UpgradeSheet from '@stevederico/skateboard-ui/UpgradeSheet';
-import DynamicIcon from '@stevederico/skateboard-ui/DynamicIcon';
+import { ArrowUp } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback, type ChangeEvent, type KeyboardEvent } from "react";
 import { getRemainingUsage, trackUsage, showUpgradeSheet } from '@stevederico/skateboard-ui/Utilities';
 import { useUser, useDispatch } from '@stevederico/skateboard-ui/Context';
@@ -213,7 +213,7 @@ export default function ChatView() {
                 : 'bg-accent text-foreground opacity-50'
             }`}
           >
-            <DynamicIcon name="arrow-up" size={18} />
+            <ArrowUp size={18} aria-hidden="true" />
           </Button>
         </div>
       </div>
