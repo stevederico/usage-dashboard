@@ -1,5 +1,10 @@
 - Add Codex collector
 - Add Gemini collector
+- Keep CalendarTestView (cleanup dropped on purpose 2026-10-17; do not redo)
+
+0.5.0
+
+  Note CalendarTestView kept
 
 0.4.0
 
