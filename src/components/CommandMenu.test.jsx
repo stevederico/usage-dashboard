@@ -17,13 +17,13 @@ vi.mock('@stevederico/skateboard-ui/Context', () => ({
   getState: () => ({ state: contextState })
 }));
 
-vi.mock('lucide-react', () => ({
+vi.mock('@stevederico/skateboard-ui/icons', () => ({
   Gauge: () => <span data-testid="icon-gauge" />,
   LayoutDashboard: () => <span data-testid="icon-layout-dashboard" />,
   ChartBar: () => <span data-testid="icon-chart-bar" />
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/command', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/command', () => ({
   Command: ({ children }) => <div data-testid="command">{children}</div>,
   CommandDialog: ({ open, children, onOpenChange }) => (
     <div data-testid="command-dialog" data-open={open}>

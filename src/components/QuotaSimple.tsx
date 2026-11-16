@@ -1,5 +1,5 @@
-import { Progress } from '@stevederico/skateboard-ui/shadcn/ui/progress';
-import { cn } from '@stevederico/skateboard-ui/shadcn/lib/utils';
+import { Progress } from '@stevederico/skateboard-ui/ui/progress';
+import { cn } from '@stevederico/skateboard-ui/lib/utils';
 import { formatPlanValue, formatReset } from '../lib/format';
 import type { PlanQuota } from './QuotaCard';
 

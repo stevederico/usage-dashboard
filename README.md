@@ -91,7 +91,7 @@ Claude `/usage` in the TUI does **not** write `cachedUsageUtilization`. Live oau
 | **React** | 19 | Frontend UI |
 | **Vite** | 8 | Dev server / build |
 | **Tailwind CSS** | 4 | Styling |
-| **skateboard-ui** | 5.1.0 | Shell, Header, shadcn |
+| **skateboard-ui** | 5.19.0 | Shell, Header, shadcn |
 | **Rust** | zero-crate | Backend HTTP |
 | **libsqlite3** | system | App DB and Cursor `state.vscdb` |
 | **TypeScript** | 7 | Strict frontend |

@@ -6,7 +6,7 @@ vi.mock('@stevederico/skateboard-ui/SettingsView', () => ({
   default: () => <div data-testid="shell-settings">Shell</div>,
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/select', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/select', () => ({
   Select: ({ children, value }) => <div data-testid="refresh-select" data-value={value}>{children}</div>,
   SelectTrigger: ({ children }) => <div>{children}</div>,
   SelectValue: () => <span>1 Hour</span>,

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import Header from '@stevederico/skateboard-ui/Header';
 import { useListData } from '@stevederico/skateboard-ui/Utilities';
-import { Button } from '@stevederico/skateboard-ui/shadcn/ui/button';
+import { Button } from '@stevederico/skateboard-ui/ui/button';
 import { Skeleton } from '@stevederico/skateboard-ui/ui/skeleton';
 import {
   Tabs,
   TabsList,
   TabsTrigger,
-} from '@stevederico/skateboard-ui/shadcn/ui/tabs';
+} from '@stevederico/skateboard-ui/ui/tabs';
 import QuotaCard from './QuotaCard';
 import QuotaSimple from './QuotaSimple';
 import type { PlanQuota } from './QuotaCard';

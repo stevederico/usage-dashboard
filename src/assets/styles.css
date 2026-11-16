@@ -1,117 +1,560 @@
 @import "@stevederico/skateboard-ui/styles.css";
 
-@source '../../node_modules/@stevederico/skateboard-ui';
+/* This app's plain CSS: the classes src/ uses that skateboard-ui's styles.css does not
+   define, a few shell rules repeated after them so they keep their precedence, and the
+   brand and dark-mode overrides. No Tailwind: edit by hand. A className token missing
+   here and in skateboard-ui's CSS fails lint (no-unknown-classes). */
 
-@theme {
-  --color-app: var(--color-blue-500);
+@layer theme {
+  :root, :host {
+    --tracking-wide: .025em;
+    --animate-bounce: bounce 1s infinite;
+    --color-warning: oklch(78% .18 85);
+  }
 }
 
+@layer utilities {
+  .\@container\/card {
+    container: card / inline-size;
+  }
+
+  .\@container\/main {
+    container: main / inline-size;
+  }
+
+  .line-clamp-1 {
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .flow-root {
+    display: flow-root;
+  }
+
+  .grid {
+    display: grid;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .inline {
+    display: inline;
+  }
+
+  .inline-block {
+    display: inline-block;
+  }
+
+  .inline-flex {
+    display: inline-flex;
+  }
+
+  .inline-grid {
+    display: inline-grid;
+  }
+
+  .inline-table {
+    display: inline-table;
+  }
+
+  .list-item {
+    display: list-item;
+  }
+
+  .table {
+    display: table;
+  }
+
+  .table-caption {
+    display: table-caption;
+  }
+
+  .table-cell {
+    display: table-cell;
+  }
+
+  .table-column {
+    display: table-column;
+  }
+
+  .table-column-group {
+    display: table-column-group;
+  }
+
+  .table-footer-group {
+    display: table-footer-group;
+  }
+
+  .table-header-group {
+    display: table-header-group;
+  }
+
+  .table-row {
+    display: table-row;
+  }
+
+  .table-row-group {
+    display: table-row-group;
+  }
+
+  .h-1 {
+    height: var(--spacing);
+  }
+
+  .w-1\.5 {
+    width: calc(var(--spacing) * 1.5);
+  }
+
+  .w-10 {
+    width: calc(var(--spacing) * 10);
+  }
+
+  .w-32 {
+    width: calc(var(--spacing) * 32);
+  }
+
+  .w-40 {
+    width: calc(var(--spacing) * 40);
+  }
+
+  .animate-bounce {
+    animation: var(--animate-bounce);
+  }
+
+  .items-end {
+    align-items: flex-end;
+  }
+
+  .justify-end {
+    justify-content: flex-end;
+  }
+
+  .justify-start {
+    justify-content: flex-start;
+  }
+
+  .gap-0 {
+    gap: 0;
+  }
+
+  .gap-5 {
+    gap: calc(var(--spacing) * 5);
+  }
+
+  :where(.space-y-1 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(var(--spacing) * var(--tw-space-y-reverse));
+    margin-block-end: calc(var(--spacing) * calc(1 - var(--tw-space-y-reverse)));
+  }
+
+  .rounded-br-sm {
+    border-bottom-right-radius: calc(var(--radius) * .6);
+  }
+
+  .rounded-bl-sm {
+    border-bottom-left-radius: calc(var(--radius) * .6);
+  }
+
+  .bg-accent {
+    background-color: var(--accent);
+  }
+
+  .bg-muted {
+    background-color: var(--muted);
+  }
+
+  .bg-muted-foreground {
+    background-color: var(--muted-foreground);
+  }
+
+  .bg-muted\/30 {
+    background-color: var(--muted);
+  }
+
+  .bg-primary {
+    background-color: var(--primary);
+  }
+
+  .bg-gradient-to-b {
+    --tw-gradient-position: to bottom in oklab;
+    background-image: linear-gradient(var(--tw-gradient-stops));
+  }
+
+  .py-0 {
+    padding-block: 0;
+  }
+
+  .py-2\.5 {
+    padding-block: calc(var(--spacing) * 2.5);
+  }
+
+  .pb-20 {
+    padding-bottom: calc(var(--spacing) * 20);
+  }
+
+  .pl-5 {
+    padding-left: calc(var(--spacing) * 5);
+  }
+
+  .text-\[11px\] {
+    font-size: 11px;
+  }
+
+  .tracking-wide {
+    --tw-tracking: var(--tracking-wide);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .text-warning {
+    color: var(--color-warning);
+  }
+
+  .bg-blend-color {
+    background-blend-mode: color;
+  }
+
+  .group-has-\[\[data-slot\=command-shortcut\]\]\/command-item\:hidden:is(:where(.group\/command-item):has([data-slot="command-shortcut"]) *) {
+    display: none;
+  }
+
+  .group-data-\[collapsible\=icon\]\:hidden:is(:where(.group)[data-collapsible="icon"] *) {
+    display: none;
+  }
+
+  .group-data-\[size\=sm\]\/alert-dialog-content\:grid:is(:where(.group\/alert-dialog-content)[data-size="sm"] *) {
+    display: grid;
+  }
+
+  .after\:bg-muted:after {
+    content: var(--tw-content);
+    background-color: var(--muted);
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-app\/80:hover {
+      background-color: #3080ffcc;
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-app\/80:hover {
+        background-color: color-mix(in oklab, var(--color-app) 80%, transparent);
+      }
+    }
+
+    .hover\:bg-primary\/80:hover {
+      background-color: var(--primary);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-primary\/80:hover {
+        background-color: color-mix(in oklab, var(--primary) 80%, transparent);
+      }
+    }
+  }
+
+  .focus-visible\:ring-app:focus-visible {
+    --tw-ring-color: var(--color-app);
+  }
+
+  :where([data-slot="tooltip-content"]) .in-data-\[slot\=tooltip-content\]\:bg-background\/20 {
+    background-color: var(--background);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    :where([data-slot="tooltip-content"]) .in-data-\[slot\=tooltip-content\]\:bg-background\/20 {
+      background-color: color-mix(in oklab, var(--background) 20%, transparent);
+    }
+  }
+
+  :is(.\*\:data-\[slot\=card\]\:bg-gradient-to-t > *)[data-slot="card"] {
+    --tw-gradient-position: to top in oklab;
+    background-image: linear-gradient(var(--tw-gradient-stops));
+  }
+
+  :is(.\*\:data-\[slot\=card\]\:from-primary\/5 > *)[data-slot="card"] {
+    --tw-gradient-from: var(--primary);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    :is(.\*\:data-\[slot\=card\]\:from-primary\/5 > *)[data-slot="card"] {
+      --tw-gradient-from: color-mix(in oklab, var(--primary) 5%, transparent);
+    }
+  }
+
+  :is(.\*\:data-\[slot\=card\]\:from-primary\/5 > *)[data-slot="card"] {
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+
+  :is(.\*\:data-\[slot\=card\]\:to-card > *)[data-slot="card"] {
+    --tw-gradient-to: var(--card);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+
+  :is(.\*\:data-\[slot\=card\]\:shadow-xs > *)[data-slot="card"] {
+    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, #0000000d);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+
+  :is(.\*\:data-\[slot\=select-value\]\:line-clamp-1 > *)[data-slot="select-value"] {
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+  }
+
+  :is(.\*\:data-\[slot\=select-value\]\:flex > *)[data-slot="select-value"] {
+    display: flex;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .motion-reduce\:animate-none {
+      animation: none;
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .sm\:block {
+      display: block;
+    }
+
+    .sm\:flex {
+      display: flex;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .md\:block {
+      display: block;
+    }
+
+    .md\:flex {
+      display: flex;
+    }
+
+    .md\:hidden {
+      display: none;
+    }
+
+    .md\:gap-6 {
+      gap: calc(var(--spacing) * 6);
+    }
+
+    .md\:py-6 {
+      padding-block: calc(var(--spacing) * 6);
+    }
+
+    .md\:pb-4 {
+      padding-bottom: calc(var(--spacing) * 4);
+    }
+
+    .md\:after\:hidden:after {
+      content: var(--tw-content);
+      display: none;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .xl\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @container card (min-width: 250px) {
+    .\@\[250px\]\/card\:text-3xl {
+      font-size: var(--text-3xl);
+      line-height: var(--tw-leading, var(--text-3xl--line-height));
+    }
+  }
+
+  @container main (min-width: 36rem) {
+    .\@xl\/main\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container main (min-width: 64rem) {
+    .\@5xl\/main\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  :where([data-slot="tooltip-content"]) .dark\:in-data-\[slot\=tooltip-content\]\:bg-background\/10:is(.dark *) {
+    background-color: var(--background);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    :where([data-slot="tooltip-content"]) .dark\:in-data-\[slot\=tooltip-content\]\:bg-background\/10:is(.dark *) {
+      background-color: color-mix(in oklab, var(--background) 10%, transparent);
+    }
+  }
+
+  .\[\&_\[data-slot\=progress-track\]\]\:bg-foreground\/30 [data-slot="progress-track"] {
+    background-color: var(--foreground);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .\[\&_\[data-slot\=progress-track\]\]\:bg-foreground\/30 [data-slot="progress-track"] {
+      background-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+    }
+  }
+
+  .\[\.border-t\]\:pt-\(--card-spacing\).border-t {
+    padding-top: var(--card-spacing);
+  }
+
+  @media (hover: hover) {
+    .\[a\]\:hover\:bg-primary\/80:is(a):hover {
+      background-color: var(--primary);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .\[a\]\:hover\:bg-primary\/80:is(a):hover {
+        background-color: color-mix(in oklab, var(--primary) 80%, transparent);
+      }
+    }
+  }
+
+  .\[\&\>button\]\:hidden > button, .\[\&\>div\:first-child\>div\:last-child\]\:hidden > div:first-child > div:last-child {
+    display: none;
+  }
+
+  .group-data-\[size\=sm\]\/avatar\:\[\&\>svg\]\:hidden:is(:where(.group\/avatar)[data-size="sm"] *) > svg {
+    display: none;
+  }
+
+  .text-heading-xl {
+    letter-spacing: -.025em;
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .text-heading-lg {
+    letter-spacing: -.025em;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .text-heading-md {
+    letter-spacing: -.02em;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .text-heading-sm {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .text-label-lg {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .text-label-md {
+    font-size: .875rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .text-label-sm {
+    font-size: .75rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .text-copy-lg {
+    font-size: 1.125rem;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .text-copy-md {
+    font-size: .875rem;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .text-copy-sm {
+    font-size: .75rem;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .material-base {
+    background-color: var(--background);
+    border: 1px solid #0000;
+  }
+
+  .material-raised {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px oklch(0% 0 0 / .05);
+  }
+
+  .material-elevated {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px oklch(0% 0 0 / .08);
+  }
+
+  .material-menu {
+    background-color: var(--popover);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px oklch(0% 0 0 / .12);
+  }
+
+  .material-modal {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 16px 48px oklch(0% 0 0 / .16);
+  }
+}
 
 [data-sidebar="footer"] [data-sidebar="menu-button"] > div {
-  flex: 0 1 auto !important;
+  flex: 0 auto !important;
 }
 
 [data-sidebar="footer"] [data-sidebar="menu-button"] > div > span {
-  overflow: visible !important;
   text-overflow: unset !important;
+  overflow: visible !important;
 }
 
 .dark {
   --card: #0d0d0d;
-  --accent: #111111;
+  --accent: #111;
 }
 
-/* Status tokens */
-@theme {
-  --color-success: oklch(0.72 0.19 142);
-  --color-success-foreground: oklch(0.98 0.02 142);
-  --color-warning: oklch(0.78 0.18 85);
-  --color-warning-foreground: oklch(0.98 0.02 85);
-  --color-info: oklch(0.7 0.15 240);
-  --color-info-foreground: oklch(0.98 0.02 240);
+:root {
+  --color-app: var(--color-blue-500);
+  --color-success: oklch(72% .19 142);
+  --color-success-foreground: oklch(98% .02 142);
+  --color-warning: oklch(78% .18 85);
+  --color-warning-foreground: oklch(98% .02 85);
+  --color-info: oklch(70% .15 240);
+  --color-info-foreground: oklch(98% .02 240);
 }
 
-/* Typography scale */
-@layer utilities {
-  .text-heading-xl {
-    font-size: 2.25rem;
-    line-height: 1.2;
-    font-weight: 600;
-    letter-spacing: -0.025em;
+@keyframes bounce {
+  0%, 100% {
+    animation-timing-function: cubic-bezier(.8, 0, 1, 1);
+    transform: translateY(-25%);
   }
-  .text-heading-lg {
-    font-size: 1.5rem;
-    line-height: 1.2;
-    font-weight: 600;
-    letter-spacing: -0.025em;
-  }
-  .text-heading-md {
-    font-size: 1.25rem;
-    line-height: 1.3;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  .text-heading-sm {
-    font-size: 1rem;
-    line-height: 1.4;
-    font-weight: 600;
-  }
-  .text-label-lg {
-    font-size: 1rem;
-    line-height: 1.5;
-    font-weight: 500;
-  }
-  .text-label-md {
-    font-size: 0.875rem;
-    line-height: 1.5;
-    font-weight: 500;
-  }
-  .text-label-sm {
-    font-size: 0.75rem;
-    line-height: 1.5;
-    font-weight: 500;
-  }
-  .text-copy-lg {
-    font-size: 1.125rem;
-    line-height: 1.6;
-    font-weight: 400;
-  }
-  .text-copy-md {
-    font-size: 0.875rem;
-    line-height: 1.6;
-    font-weight: 400;
-  }
-  .text-copy-sm {
-    font-size: 0.75rem;
-    line-height: 1.5;
-    font-weight: 400;
-  }
-}
 
-/* Material / elevation utilities */
-@layer utilities {
-  .material-base {
-    background-color: var(--background);
-    border: 1px solid transparent;
-  }
-  .material-raised {
-    background-color: var(--card);
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 2px oklch(0 0 0 / 0.05);
-  }
-  .material-elevated {
-    background-color: var(--card);
-    border: 1px solid var(--border);
-    box-shadow: 0 4px 12px oklch(0 0 0 / 0.08);
-  }
-  .material-menu {
-    background-color: var(--popover);
-    border: 1px solid var(--border);
-    box-shadow: 0 8px 24px oklch(0 0 0 / 0.12);
-  }
-  .material-modal {
-    background-color: var(--card);
-    border: 1px solid var(--border);
-    box-shadow: 0 16px 48px oklch(0 0 0 / 0.16);
+  50% {
+    animation-timing-function: cubic-bezier(0, 0, .2, 1);
+    transform: none;
   }
 }

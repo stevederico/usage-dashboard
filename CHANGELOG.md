@@ -2,6 +2,18 @@
 - Add Gemini collector
 - Keep CalendarTestView (cleanup dropped on purpose 2026-10-17; do not redo)
 
+0.6.0
+
+  Bump skateboard-ui 5.19.0
+  Icons from skateboard-ui
+  Router from skateboard-ui
+  Rewrite shadcn imports
+  Plain CSS
+  Drop Tailwind
+  Drop lucide-react
+  Drop react-router
+  Drop @types/node
+
 0.5.1
 
   Pin base images

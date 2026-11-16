@@ -6,15 +6,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@stevederico/skateboard-ui/shadcn/ui/card';
-import { Label } from '@stevederico/skateboard-ui/shadcn/ui/label';
+} from '@stevederico/skateboard-ui/ui/card';
+import { Label } from '@stevederico/skateboard-ui/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@stevederico/skateboard-ui/shadcn/ui/select';
+} from '@stevederico/skateboard-ui/ui/select';
 import { readRefreshMs, writeRefreshMs, REFRESH_OPTIONS } from '../lib/settings';
 
 /**

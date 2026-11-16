@@ -45,7 +45,7 @@ vi.mock('./QuotaSimple.jsx', () => ({
   ),
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/tabs', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/tabs', () => ({
   Tabs: ({ children, value, onValueChange }) => (
     <div data-testid="tabs" data-value={value}>
       <button type="button" onClick={() => onValueChange('advanced')}>

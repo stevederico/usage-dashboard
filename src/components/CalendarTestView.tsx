@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Header from '@stevederico/skateboard-ui/Header';
-import { Calendar } from '@stevederico/skateboard-ui/shadcn/ui/calendar';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@stevederico/skateboard-ui/shadcn/ui/card';
+import { Calendar } from '@stevederico/skateboard-ui/ui/calendar';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@stevederico/skateboard-ui/ui/card';
 
 /** Selected range in mode="range" — mirrors react-day-picker's DateRange shape. */
 interface DateRange {

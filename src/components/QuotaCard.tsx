@@ -4,10 +4,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@stevederico/skateboard-ui/shadcn/ui/card';
-import { Progress } from '@stevederico/skateboard-ui/shadcn/ui/progress';
-import { Badge } from '@stevederico/skateboard-ui/shadcn/ui/badge';
-import { cn } from '@stevederico/skateboard-ui/shadcn/lib/utils';
+} from '@stevederico/skateboard-ui/ui/card';
+import { Progress } from '@stevederico/skateboard-ui/ui/progress';
+import { Badge } from '@stevederico/skateboard-ui/ui/badge';
+import { cn } from '@stevederico/skateboard-ui/lib/utils';
 import { formatTokenCount, weekdayLabel } from '../lib/format';
 
 /** One usage bar on a plan card. */

@@ -6,11 +6,11 @@ vi.mock('@stevederico/skateboard-ui/Header', () => ({
   default: ({ title }) => <header data-testid="header">{title}</header>
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/button', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/button', () => ({
   Button: ({ children, onClick }) => <button type="button" onClick={onClick}>{children}</button>
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/empty', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/empty', () => ({
   Empty: ({ children }) => <div data-testid="empty">{children}</div>,
   EmptyHeader: ({ children }) => <div>{children}</div>,
   EmptyMedia: ({ children }) => <div>{children}</div>,
@@ -18,7 +18,7 @@ vi.mock('@stevederico/skateboard-ui/shadcn/ui/empty', () => ({
   EmptyDescription: ({ children }) => <p>{children}</p>
 }));
 
-vi.mock('lucide-react', () => ({
+vi.mock('@stevederico/skateboard-ui/icons', () => ({
   LayoutDashboard: () => <span data-testid="default-icon" />,
   Plus: () => <span data-testid="plus-icon" />
 }));

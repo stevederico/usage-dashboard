@@ -10,8 +10,8 @@ import {
   CommandGroup,
   CommandItem,
   CommandShortcut,
-} from '@stevederico/skateboard-ui/shadcn/ui/command';
-import { ChartBar, Gauge, LayoutDashboard } from 'lucide-react';
+} from '@stevederico/skateboard-ui/ui/command';
+import { ChartBar, Gauge, LayoutDashboard } from '@stevederico/skateboard-ui/icons';
 
 /** Page entry from constants.json's pages array. */
 interface PageEntry {

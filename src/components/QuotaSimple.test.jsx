@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '../test/dom.js';
 import QuotaSimple from './QuotaSimple';
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/progress', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/progress', () => ({
   Progress: ({ value, 'aria-label': label }) => (
     <div role="progressbar" aria-valuenow={value} aria-label={label} />
   ),

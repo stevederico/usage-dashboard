@@ -37,26 +37,26 @@ vi.mock('@stevederico/skateboard-ui/UpgradeSheet', () => ({
   default: vi.fn().mockImplementation(() => <div data-testid="upgrade-sheet" />)
 }));
 
-vi.mock('lucide-react', () => ({
+vi.mock('@stevederico/skateboard-ui/icons', () => ({
   ArrowUp: () => <span data-testid="send-icon" />
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/input', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/input', () => ({
   Input: (props) => <input data-testid="message-input" {...props} />
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/button', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/button', () => ({
   Button: ({ children, onClick, disabled, ...props }) => (
     <button type="button" onClick={onClick} disabled={disabled} {...props}>{children}</button>
   )
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/card', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/card', () => ({
   Card: ({ children, className }) => <div className={className}>{children}</div>,
   CardContent: ({ children }) => <div>{children}</div>
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/dialog', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/dialog', () => ({
   Dialog: ({ open, children, onOpenChange }) => (
     open ? (
       <div data-testid="usage-error-dialog">

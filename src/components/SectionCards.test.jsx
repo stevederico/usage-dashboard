@@ -2,16 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '../test/dom.js';
 import { SectionCards } from './SectionCards.jsx';
 
-vi.mock('lucide-react', () => ({
+vi.mock('@stevederico/skateboard-ui/icons', () => ({
   TrendingUp: () => <span data-testid="trending-up" />,
   TrendingDown: () => <span data-testid="trending-down" />
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/badge', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/badge', () => ({
   Badge: ({ children }) => <span data-testid="badge">{children}</span>
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/card', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/card', () => ({
   Card: ({ children, className }) => <div data-testid="card" className={className}>{children}</div>,
   CardAction: ({ children }) => <div>{children}</div>,
   CardDescription: ({ children }) => <p>{children}</p>,

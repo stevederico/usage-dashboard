@@ -6,7 +6,7 @@ vi.mock('@stevederico/skateboard-ui/Header', () => ({
   default: ({ title }) => <header data-testid="header">{title}</header>
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/card', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/card', () => ({
   Card: ({ children }) => <div data-testid="card">{children}</div>,
   CardHeader: ({ children }) => <header>{children}</header>,
   CardTitle: ({ children }) => <h2>{children}</h2>,
@@ -14,7 +14,7 @@ vi.mock('@stevederico/skateboard-ui/shadcn/ui/card', () => ({
   CardContent: ({ children }) => <div>{children}</div>
 }));
 
-vi.mock('@stevederico/skateboard-ui/shadcn/ui/calendar', () => ({
+vi.mock('@stevederico/skateboard-ui/ui/calendar', () => ({
   Calendar: ({ mode, selected, onSelect, disabled, captionLayout }) => {
     const variant = disabled?.length ? 'disabled' : (captionLayout || 'default');
     const id = `${mode}-${variant}`;

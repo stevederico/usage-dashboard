@@ -1,13 +1,13 @@
 import Header from '@stevederico/skateboard-ui/Header';
 import UpgradeSheet from '@stevederico/skateboard-ui/UpgradeSheet';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp } from '@stevederico/skateboard-ui/icons';
 import { useState, useEffect, useRef, useCallback, type ChangeEvent, type KeyboardEvent } from "react";
 import { getRemainingUsage, trackUsage, showUpgradeSheet } from '@stevederico/skateboard-ui/Utilities';
 import { useUser, useDispatch } from '@stevederico/skateboard-ui/Context';
-import { Input } from '@stevederico/skateboard-ui/shadcn/ui/input';
-import { Button } from '@stevederico/skateboard-ui/shadcn/ui/button';
-import { Card, CardContent } from '@stevederico/skateboard-ui/shadcn/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@stevederico/skateboard-ui/shadcn/ui/dialog';
+import { Input } from '@stevederico/skateboard-ui/ui/input';
+import { Button } from '@stevederico/skateboard-ui/ui/button';
+import { Card, CardContent } from '@stevederico/skateboard-ui/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@stevederico/skateboard-ui/ui/dialog';
 
 /** Single chat message rendered in the conversation list. */
 interface Message {
